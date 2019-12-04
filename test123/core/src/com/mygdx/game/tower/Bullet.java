@@ -9,92 +9,86 @@ import com.mygdx.game.Entity;
 import com.mygdx.game.minion.Enemy;
 import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
+import java.util.ArrayList;
+
 public class Bullet extends Entity  {
 
     private Sprite bullet;
     private int damage;
-    protected float speed, angle;
-    private float distance;
+    protected float speed; //,angle;
+    private double distance;
+//    private ArrayList<Bullet> bullets;
+
 //    private double distance;
 
-    protected Enemy target;
+    private Enemy target;
 
 
-    public Bullet(String type , int damage , Vector2 position ,float speed,Enemy target, double x , double y){
-        this.damage=damage;
-        this.position=position;
-        this.speed=speed;
-        this.target=target;
-        this.angle=getAngle();
+    public Bullet(String type,double x, double y,Enemy target ){
         this.x=x;
         this.y=y;
+        this.target=target;
+        bullet=new Sprite(new Texture(Gdx.files.internal("Bullet1.png")));
+        speed = 10;
+        damage = 10;
 
-        setBulletType(type);
+//        setBullettype(type);
 
         setActive(true);
     }
 
-    public void setBulletType(String type) {
 
-        if(type == "normal") {
-            bullet = new Sprite(new Texture(Gdx.files.internal("bullet1.png")));
-
-            damage = 3;
-
-        }
-        if(type == "smg") {
-            bullet = new Sprite(new Texture(Gdx.files.internal("bullet2.png")));
-
-            damage = 3;
-
-        }
-        if(type == "rifle") {
-            bullet = new Sprite(new Texture(Gdx.files.internal("bullet3.png")));
-
-            damage = 10;
-
-        }
-        if(type == "mortar") {
-            bullet = new Sprite(new Texture(Gdx.files.internal("bullet4.png")));
-
-            damage = 50;
-
-        }
-    }
 
     public void move() {
-        Vector2 enemyPos = target.getPosition();
-        if(enemyPos.x > x){
-            position.x+=speed;
-        }else if (enemyPos.x < x){
-            position.x-=speed;
+//        Vector2 enemyPos = target.getPosition();
+////        if(enemyPos.x > x){
+////            position.x+=speed;
+////        }else if (enemyPos.x < x){
+////            position.x-=speed;
+////        }
+////        if(enemyPos.y > y){
+////            position.y+=speed;
+////        }else if (enemyPos.y < y){
+////            position.y-=speed;
+////        }//        distance = (float) Math.sqrt(Math.pow(enemyPos.x,x)) + (float) Math.sqrt(Math.pow(enemyPos.y,y));
+        double xPos = target.getX() + 30 - x ;
+        double yPos = target.getY() + 30 - x ;
+        distance = Math.sqrt(Math.pow(xPos,2) + Math.pow(yPos,2));
+
+        double speedX = xPos/distance*speed;
+        double speedY = yPos/distance*speed;
+
+        if(Math.abs(xPos) >= Math.abs(speedX) && Math.abs(yPos) >= Math.abs(speedY)){
+            x+=speedX;
+            y+=speedY;
         }
-        if(enemyPos.y > y){
-            position.y+=speed;
-        }else if (enemyPos.y < y){
-            position.y-=speed;
+
+        else {
+            x = target.getX()+30;
+            y = target.getY()+30;
         }
-        distance = (float) Math.sqrt(Math.pow(enemyPos.x,x)) + (float) Math.sqrt(Math.pow(enemyPos.y,y));
-
-
     }
 
-    public float getAngle() {
-        Vector2 targetPosition= target.getPosition();
-        float deltaX=(float)(this.position.x - targetPosition.x);
-        float deltaY=(float)(this.position.y - targetPosition.y);
-        float angleInDegrees = (float) (Math.atan2(deltaY, deltaX) * 180 / Math.PI);
-        return angleInDegrees;
-    }
+//    public void setBullettype(String type){
+//        if(type == "normalTower"){
+//
+//        }
+//    }
 
-    public int getDamage() {
-        return damage;
-    }
+//    public float getAngle() {
+//        Vector2 targetPosition= target.getPosition();
+//        float deltaX=(float)(this.position.x - targetPosition.x);
+//        float deltaY=(float)(this.position.y - targetPosition.y);
+//        float angleInDegrees = (float) (Math.atan2(deltaY, deltaX) * 180 / Math.PI);
+//        return angleInDegrees;
+//    }
+
 
     @Override
     public void draw(SpriteBatch batch, float delta) {
         if(isActive()){
             bullet.draw(batch);
+            update(delta);
         }
 
     }
@@ -103,6 +97,7 @@ public class Bullet extends Entity  {
     public void SpawnPos() {
 
     }
+
 
     @Override
     public void update(float delta) {
@@ -115,5 +110,7 @@ public class Bullet extends Entity  {
             setActive(false);
             target.setHP(target.getHP()-damage);
         }
+
     }
+
 }

@@ -7,131 +7,137 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.Entity;
 import com.mygdx.game.minion.Enemy;
 import com.mygdx.game.screens.GameMap;
-import com.mygdx.game.screens.GameScreen;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public abstract class Tower extends Entity {
+public class Tower extends Entity {
 
-    protected int shotSpeed;
     protected int damage;
     protected int cost;
     protected Sprite tower=null;
-    public Bullet bullet;
+//    public Bullet bullet;
     protected float attacktimer;
     protected float cooldown;
-    protected String name;
+    protected String name,type;
+
+    private ArrayList<Enemy> enemies;
+    private ArrayList<Bullet> bullets;
+    private ArrayList<Enemy> targets ;
 
 
-    private ArrayList<Enemy> targets = null ;
 
+    private final int range = 500;
 
-    private final int range = 200;
-
-    public Tower (int damage, int shotSpeed,int cost,String name){
+    public Tower (ArrayList<Enemy> enemies ,int damage, int cooldown ,int cost ,String name){
         this.damage=damage;
-        this.shotSpeed=shotSpeed;
+        this.cooldown=cooldown;
         this.cost=cost;
         this.name=name;
-        attacktimer = 0 ;
+        this.enemies = enemies ;
+        attacktimer = 2 ;
         tower=new Sprite(new Texture(Gdx.files.internal("tower1.png")));
-        targets=new ArrayList<Enemy>();
-        setCooldown(shotSpeed);
+        targets=new ArrayList<>();
+        bullets = new ArrayList<>();
+        SpawnPos();
+
 
     }
 
-    public int getCost() { return cost; }
+    public double distance(Enemy target) {
 
-    public void setCost(int cost) { this.cost = cost; }
-
-    public int getDamage() { return damage; }
-
-    public int getShotSpeed() { return shotSpeed; }
-
-    public float getAttacktimer() { return attacktimer; }
-
-    public String getName(){return name;}
-
-    protected void setCooldown(float attackRate){
-        cooldown = 1f / shotSpeed;
+        double a = Math.abs(target.getX() - x);
+        double b = Math.abs(target.getY() - y);
+        double c = Math.pow(a, 2) + Math.pow(b, 2);
+        return Math.sqrt(c);
     }
 
-//    public Bullet getBullet() {
-//        return bullet;
-//    }
-
-
-
-    private void acquireTarget(List<Enemy> enemies) {
+    public void lockEnemy(ArrayList<Enemy> enemies) {
         for (Enemy enemy : enemies) {
-            if (!targets.contains(enemy)) {
-                if (checkEnemy(enemy)) {
+
+            if (distance(enemy) <= range) {
+
+                if (targets.isEmpty()) {
                     targets.add(enemy);
                 }
+                System.out.println(targets);
             }
         }
     }
 
-    private void updateTargets() {
 
-        for (int i = targets.size() - 1; i >= 0; i--) {
-            if (!checkEnemy(targets.get(i)) || !targets.get(i).isActive()) {
+    public void unlockEnemy(ArrayList<Enemy> targets){
+        for(int i = 0; i < targets.size(); i++) {
+            if(((distance(targets.get(i)) > range && (!targets.get(i).isActive() || targets.get(i).isActive()))
+                    || (distance(targets.get(i)) <= range && !targets.get(i).isActive())) && !targets.isEmpty()) {
+
                 targets.remove(i);
             }
         }
     }
 
-    private void shoot(float delta) {
-        attacktimer += delta;
-        if(targets.size() > 0){
-            if(attacktimer >= cooldown){
-                attacktimer = 0;
-                Bullet shootBullet = Bullet.createBullet (this, targets.get(0));
-                Bullet.add(shootBullet);
-            }
+    public void shoot(Enemy target, float delta) {
+
+        for (int i = 0; i< bullets.size(); i++) {
+
+            // Remove bullet from Bullets Array
+            if(!bullets.get(i).isActive())
+                bullets.remove(i);
+        }
+
+        // Always Add an Bullet to the Bullets Array if It's Empty
+        attacktimer -= delta;
+        if(attacktimer <= 0) {
+            bullets.add(new Bullet(type,tower.getX() + tower.getWidth()/2, tower.getY() + tower.getHeight()/2, target));
+            attacktimer = cooldown;
         }
     }
 
-    public boolean checkEnemy(Enemy enemy){
-        float distanceX = (float) Math.abs(Tower.super.getX() - enemy.getPosition().x);
-        float distanceY = (float) Math.abs(Tower.super.getY() - enemy.getPosition().y);
 
-        if(distanceX > GameMap.destination / 2 +range){
-            return false;
-        }
-        if(distanceY > GameMap.destination / 2 +range){
-            return false;
-        }
-        if(distanceX <= GameMap.destination / 2 +range){
-            return false;
-        }
-        if(distanceY <= GameMap.destination / 2 +range){
-            return false;
-        }
-        float cornerDistance = (distanceX-GameMap.destination/2)*(distanceX -GameMap.destination / 2 )+(distanceY-GameMap.destination/2)*(distanceY -GameMap.destination / 2 );
-        return (cornerDistance <= range*range);
+
+
+
+    public void drawBullet(SpriteBatch batch, float delta) {
+        for (Bullet bullet : bullets) bullet.draw(batch, delta);
     }
 
     @Override
     public void draw(SpriteBatch batch, float delta) {
-        tower.draw(batch);
-        tower.setPosition((float)x,(float)y);
 
+        for(Bullet bullet : bullets){bullet.draw(batch,delta);}
+
+        tower.setX((float) x);
+        tower.setY((float) y);
+
+        drawBullet(batch, delta);
+
+        tower.draw(batch);
 
     }
 
     @Override
     public void SpawnPos() {
+        for(int Y = 0; Y< GameMap.Map.length; Y++){
+            for(int X=0;X<GameMap.Map[Y].length;X++) {            //
+                if (GameMap.Map[Y][X] == 5) {
+                    y += Y * 60;
+                    x += X * 60;
 
+                    break;
+                }
+            }
+        }
     }
 
+    @Override
     public void update(float delta) {
-        List<Enemy> enemies =
-        acquireTarget(enemies);
-        updateTargets();
-        shoot(delta);
-    }
+        if(isActive()){
+            lockEnemy(enemies);
+            unlockEnemy(targets);
+            for (Enemy target : targets){
+                shoot(target,delta);
+            }
 
+        }
+    }
 
 }

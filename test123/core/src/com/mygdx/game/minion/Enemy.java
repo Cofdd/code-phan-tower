@@ -12,7 +12,7 @@ public  class Enemy extends Entity {
 
    protected double speed;
    protected float armor;
-   protected Sprite enemy = null;
+   protected Sprite enemy ;
    protected float HP;
 
    private int road,m,n=0;
@@ -88,7 +88,10 @@ public  class Enemy extends Entity {
         }
     }
 
+    @Override
+    public void update(float delta) {
 
+    }
 
 
     public void dispose(){

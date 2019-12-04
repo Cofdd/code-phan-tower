@@ -4,11 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.level.SpawnEnemy;
 
 public class sniperTower extends Tower {
     public sniperTower(){
-        super(10,10,10,"Normaltower");
-        tower=new Sprite(new Texture(Gdx.files.internal("tower1.png")));
+        super(SpawnEnemy.enemyList,10,10,10,"SniperTower" );
+        tower=new Sprite(new Texture(Gdx.files.internal("tower.png")));
     }
     @Override
     public void draw(SpriteBatch batch, float delta) {

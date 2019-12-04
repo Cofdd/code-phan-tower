@@ -7,21 +7,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
 public abstract class Entity {
-    protected Vector2 position;
-    protected GDSprite sprite;
-    protected boolean active;
+    public Entity(){
+    }
     protected double x,y;
     public abstract void draw(SpriteBatch spriteBatch,float delta);
     public abstract void SpawnPos();
-    public Entity (GDSprite sprite){
-        this.sprite = sprite;
-        this.active = false;
-    }
-
-    public void update(float delta) {
-        sprite.setX(this.position.x);
-        sprite.setY(this.position.y);
-    }
+    public abstract void update(float delta);
 
     public double getX() {
         return x;
@@ -37,13 +28,10 @@ public abstract class Entity {
     }
 
 
-    public GDSprite getSprite() {
-        return sprite;
-    }
 
-    public void setSprite(GDSprite sprite) {
-        this.sprite = sprite;
-    }
+    protected Vector2 position;
+
+    protected boolean active=true;
 
     public boolean isActive() {
         return active;
@@ -53,16 +41,10 @@ public abstract class Entity {
         this.active = active;
     }
 
-    public void setPosition(Vector2 position){
-        this.position = position;
-        sprite.setX(position.x);
-        sprite.setY(position.y);
-    }
+
+
 
     public Vector2 getPosition() {
         return position;
     }
-
-
-
 }

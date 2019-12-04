@@ -3,16 +3,10 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.level.level;
+import com.mygdx.game.level.SpawnEnemy;
 import com.mygdx.game.minion.Enemy;
 import com.mygdx.game.tower.Bullet;
-
-import java.util.ArrayList;
-import java.util.logging.Level;
-
-
+import com.mygdx.game.tower.Tower;
 
 
 public class GameScreen  implements Screen {
@@ -21,11 +15,12 @@ public class GameScreen  implements Screen {
 //    public ArrayList<Bullet> bullets;
 
 
-    private level nguyenNgu;
+    private SpawnEnemy levels;
 
+    private Tower Tower;
 //    public int pixelRatio =16;
     //   OrthographicCamera camera;
-//    private Enemy enemies;
+
 
 
     @Override
@@ -35,7 +30,10 @@ public class GameScreen  implements Screen {
     public GameScreen (TowerDefenseMain theGame){
         this.theGame = theGame;
         map=new GameMap(theGame.batch);
-        nguyenNgu = new level();
+        levels = new SpawnEnemy();
+        Tower = new Tower(SpawnEnemy.enemyList,10,3,10,"normalTower");
+
+
 //        bullets = new ArrayList<Bullet>();
     }
 
@@ -46,7 +44,9 @@ public class GameScreen  implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         theGame.batch.begin();
         map.draw();
-        nguyenNgu.draw(theGame.batch,delta);
+        levels.draw(theGame.batch,delta);
+        Tower.draw(theGame.batch,delta);
+
 
 
         theGame.batch.end();
@@ -75,7 +75,7 @@ public class GameScreen  implements Screen {
 
     @Override
     public void dispose() {
-        nguyenNgu.dispose();
+        levels.dispose();
         map.dispose();
     }
 }
